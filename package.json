@@ -1,0 +1,14 @@
+{
+  "name": "verify-email",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "jsonwebtoken": "^7.2.1",
+    "mongoose": "^4.7.8",
+    "nodemailer": "^2.7.2"
+  }
+}

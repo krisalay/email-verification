@@ -27,8 +27,8 @@ router.post('/', function(req, res, next) {
 		transportOption: {
 			service: 'Gmail',
 			auth: {
-				user: 'corooms0059@gmail.com',
-				pass: 'friendsandco@110059'
+				user: '<youremail@gmail.com>',
+				pass: '<yourpassword>'
 			}
 		},
 		passwordToSecureUrl: 'password_secure',
