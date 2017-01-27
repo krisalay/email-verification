@@ -102,7 +102,7 @@ module.exports= {
 				});
 			});
 		}else{
-			return({success: false, msg: 'The requested url is not valid'});
+			return({success: false, msg: 'The requested url is not valid or has expired. Resend the verification url'});
 		}
 	}
 };
