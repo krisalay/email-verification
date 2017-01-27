@@ -6,6 +6,7 @@ var jwt = require('jsonwebtoken');
 
 var emailer = require('./emailer');
 var script = require('./script');
+var config = require('./config');
 
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
@@ -28,8 +29,8 @@ module.exports= {
 		//var mailOption = obj.mailOption;
 		return new Promise(function(resolve,reject){
 			script.check_existence_of_data_in_collection(obj.userModel,obj.usermodelFieldName,obj.userInputOption.email).then(function(is_user_perm){
-				script.check_existence_of_data_in_collection(TempUser,obj.usermodelFieldName,obj.userInputOption.email).then(function(is_user_temp){
-					if(is_user_perm || is_user_temp){
+				script.check_existence_of_data_in_collection(TempUser,'email',obj.userInputOption.email).then(function(is_user_temp){
+					if(is_user_perm.success || is_user_temp.success){
 						resolve({success: false, msg: 'Registration failed: User already exists'});
 					}else{
 						var temp_user = new TempUser();
@@ -62,7 +63,7 @@ module.exports= {
 	authenticate_token: function(req,res,next){
 		var token = req.body.token || req.query.token || req.header['x-access-token'];
 		if(token){
-			jwt.verify(token, 'jwtsecret', function(err,decoded){
+			jwt.verify(token, config.VERIFICATION_URL_SECRET, function(err,decoded){
 				if(err){
 					console.log('ERROR: failed to authenticate token');
 					res.json({success: false, message: 'failed to authenticate token'});
@@ -76,6 +77,32 @@ module.exports= {
 				success: false,
 				message: 'No token provided'
 			});
+		}
+	},
+
+	verify: function(arg_req,arg_perm_user){
+		if(arg_req.decoded){
+			return new Promise(function(resolve,reject){
+				script.check_existence_of_data_in_collection(TempUser,'email',arg_req.decoded.email).then(function(is_user_temp){
+					if(is_user_temp.success){
+						var perm_user = new arg_perm_user();
+						perm_user.email = is_user_temp.data[0].email;
+						perm_user.password = is_user_temp.data[0].password;
+						perm_user.save(function(error_saving_perm_user){
+							if(error_saving_perm_user){
+								console.log(error_saving_perm_user);
+								resolve({success: false, msg: 'Error: saving user'});
+							}
+							script.remove_doc_in_collection(TempUser,{email: is_user_temp.data[0].email});
+							resolve({success: true, msg: 'account activated successfully'});
+						});
+					}else{
+						resolve({success: false, msg: 'User is already activeted. Redirect to login page'});
+					}
+				});
+			});
+		}else{
+			return({success: false, msg: 'The requested url is not valid'});
 		}
 	}
 };

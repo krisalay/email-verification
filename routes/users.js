@@ -18,7 +18,7 @@ router.post('/', function(req, res, next) {
 		},
 		usermodelFieldName: 'email',
 		mailOption: {
-			from: 'krisalay@gmail.com',
+			from: '<email>',
 			to: req.body.email,
 	        subject: 'Please confirm account',
 	        html: 'Click the following link to confirm your account:</p><p>@{{URL}}</p>',
@@ -28,23 +28,22 @@ router.post('/', function(req, res, next) {
 			service: 'Gmail',
 			auth: {
 				user: '<youremail@gmail.com>',
-				pass: '<yourpassword>'
+				pass: '<your_password>'
 			}
 		},
-		passwordToSecureUrl: 'password_secure',
 		request:req,
 		verificationRoutePath: '/users/verify'
 	}).then(function(response_result){
 		console.log(response_result);
+		res.json(response_result);
 	});
 });
 
 router.get('/verify', function(req, res, next) {
-	if(req.decoded){
-		res.json({success: true, msg: 'account activated successfully'});
-	}else{
-		res.json({success: false, msg: 'The requested url is not valid'});
-	}
+	a.verify(req,PermUser,'email').then(function(response_verification){
+		console.log(response_verification);
+		res.json(response_verification);
+	});
 });
 
 module.exports = router;
